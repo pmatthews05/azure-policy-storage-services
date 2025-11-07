@@ -22,12 +22,11 @@ else {
 }
 
 Write-Host "Removing Policy Definition..."
-$policyDefinition = Get-AzPolicyDefinition -Name $policyName -ErrorAction SilentlyContinue
-if ($policyDefinition) {
-    Remove-AzPolicyDefinition -Name $policyName -Force
+try {
+    $policyDefinition = Get-AzPolicyDefinition -Name $policyName -ErrorAction Stop
     Write-Host "Policy Definition removed."
 }
-else {
+catch {
     Write-Host "Policy Definition not found."
 }
 
@@ -80,4 +79,4 @@ else {
     Write-Host "Resource Group '$storageRgName' not found."
 }
 
-Write-Host "Destroy completed."
+Write-Host "Destroyed completed."
