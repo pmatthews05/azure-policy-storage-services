@@ -8,10 +8,12 @@
 #  Install-Module -Name Az.Resources -AllowClobber -Force
 #  Install-Module -Name Az.OperationalInsights -AllowClobber -Force
 #  Install-Module -Name Az.ManagedServiceIdentity -AllowClobber -Force
+#  Install-Module -Name Az.PolicyInsights -AllowClobber -Force
 #>
 #Requires -Module Az.Resources
 #Requires -Module Az.OperationalInsights
 #Requires -Module Az.ManagedServiceIdentity
+#Requires -Module Az.PolicyInsights
 
 . $PSScriptRoot\variables.ps1
 

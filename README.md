@@ -32,6 +32,13 @@ If a storage account is created manually in the portal, then the policy will rem
 1. Run the above scripts to create the resources.
 2. Waiting as long as you like, but the storage account that gets created will remain non-compliant.
 3. Manually remediate the Azure Policy assignment in the Azure Portal.
+> Note: If the storage account isn't showing up as non-compliant yet (or compliant if the bug is fixed) in the portal for Azure Policy, then run the following powershell which forces an evaluation:
+> ```powershell
+> Install-Module -Name Az.PolicyInsights -AllowClobber -Force #If required
+> Start-AzPolicyComplianceScan -ResourceGroupName "$storageRgName"
+> ```
+> Once the evaluation is complete, you should see the storage account showing in the Azure Portal ready to remediate.
+
 4. Observe that the storage account is now compliant.
 
 ### Manually create storage account
