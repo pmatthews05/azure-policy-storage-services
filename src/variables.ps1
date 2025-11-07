@@ -1,15 +1,15 @@
-$YourPrefix = "ICS"  # Replace with your unique prefix
+$YourPrefix = "cf"  # Replace with your unique prefix
 $YourSuffix = "pm"  # Replace with your unique suffix
 $location = "UKSouth"
 
 $policyName = "$($YourPrefix)StoragePolicy"
-$policyDisplayName = "$YourPrefix Storage Policy"
+$policyDisplayName = "$($YourPrefix.ToUpper()) Storage Policy"
 $policyAssignmentName = "$($YourPrefix)StoragePolicyAssignment"
 
-$logAnalyticsRgName = "$YourPrefix-LogAnalytics-RG"
-$workspaceName = "$($YourPrefix)LogAnalytics$($YourSuffix)"
+$logAnalyticsRgName = "$YourPrefix-loganalytics-rg"
+$workspaceName = "$($YourPrefix)loganalytics$($YourSuffix)"
 
-$storageRgName = "$YourPrefix-Storage-RG"
+$storageRgName = "$YourPrefix-storage-rg"
 $storageAccountName = "$($YourPrefix)storage$($YourSuffix)"
 
 $userIdentityName = "$($YourPrefix)StoragePolicyIdentity$($YourSuffix)"

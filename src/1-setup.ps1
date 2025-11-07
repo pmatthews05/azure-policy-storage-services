@@ -69,7 +69,7 @@ else {
     Write-Host "Role assignment 'Monitoring Contributor' already exists."
 }
 
-Write-Host "Creating a Policy Assignment for ICS Storage Policy..."
+Write-Host "Creating a Policy Assignment for $prefix Storage Policy..."
 $policyAssignment = New-AzPolicyAssignment -Name "$policyAssignmentName" `
     -PolicyDefinition $policyDefinition `
     -Scope $storageRg.ResourceId `

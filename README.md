@@ -15,9 +15,17 @@ If a storage account is created manually in the portal, then the policy will rem
 ## Usage
 1. Clone the repository to your local machine.
 2. Open PowerShell and navigate to the cloned repository directory.
-3. Run the scripts in the following order:
-   - `1-create-log-analytics.ps1`: Creates the Log Analytics workspace and User Assigned Managed Identity.
-   - `2-create-storage.ps1`: Creates the Storage Account with diagnostics enabled.
+3. Check the [variables.ps1](/src/variables.ps1) file and modify the following variables as needed:
+
+| Variable Name | Description                                            |
+| ------------- | ------------------------------------------------------ |
+| $YourPrefix   | A unique prefix for resource names to avoid conflicts. |
+| $YourSuffix   | A unique suffix for resource names to avoid conflicts. |
+| $Location     | The Azure region where resources will be created.      |
+
+4. Run the scripts in the following order:
+   - [1-setup.ps1](/src/1-setup.ps1): Creates the Log Analytics workspace and User Assigned Managed Identity.
+   - [2-create-storage.ps1](/src/2-create-storage.ps1): Creates the Storage Account with diagnostics enabled.
 
 
 ## Walkthrough for Bug
@@ -32,5 +40,17 @@ If a storage account is created manually in the portal, then the policy will rem
 3. Observe that the policy automatically remediates the storage account to enable diagnostics. (Less than 5 minutes)
 
 
+## Resources Created
+| Resource Type           | Name                                     | Description                                                                  |
+| ----------------------- | ---------------------------------------- | ---------------------------------------------------------------------------- |
+| Azure Policy Definition | `$(yourprefix)StoragePolicy`             | Custom policy definition to enforce diagnostics on storage account services. |
+| Resource Group          | `$(yourprefix)-loganalytics-rg`          | Resource group for Log Analytics workspace, and User Managed Identity        |
+| Log Analytics Workspace | `$(yourprefix)LogAnalytics$(yoursuffix)` | Workspace to store diagnostics logs.                                         |
+| Resource Group          | `$(yourprefix)-storage-rg`                | Resource group for Storage Accounts.                                          |
+| User Managed Identity  | `$(yourprefix)StoragePolicyIdentity$(yoursuffix)` | Identity used by the policy to enable diagnostics on storage accounts.       |
+| Role Assignments        | N/A                                      | Assigns necessary permissions to the User Managed Identity. (Log Analytics Contributor and Monitoring Contributor) at Subscription scope. |
+| Azure Policy Assignment | `$(yourprefix)StoragePolicyAssignment`   | Policy assignment to enforce the storage policy on the specified scope.     |
+
+
 ## Cleanup
-To remove all resources created by the scripts, run the `3-destroy.ps1` script.
+To remove all resources created by the scripts, run the [3-destroy.ps1](/src/3-destroy.ps1) script.
