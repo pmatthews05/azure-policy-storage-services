@@ -1,0 +1,315 @@
+{
+  "properties": {
+    "displayName": "Enable logging by category group for Storage Blob Services (blobService/fileService/queueService/tableService) to log Analytics",
+    "policyType": "Custom",
+    "mode": "All",
+    "description": "Resource logs should be enabled to track activities and events that take place on your resources and give you visibility and insights into any changes that occur. This policy deploys a diagnostic setting using a category group to route logs to a Log Analytics workspace for Storage Account Services (blobServices/fileServices/queueServices/tableServices).",
+    "metadata": {
+      "category": "Monitoring",
+      "version": "1.0.0",
+      "createdBy": "757405d2-249c-4c4d-8d26-87f295e13c45",
+      "createdOn": "2025-11-07T09:06:55.4916709Z",
+      "updatedBy": null,
+      "updatedOn": null
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "categoryGroup": {
+        "type": "String",
+        "metadata": {
+          "description": "Diagnostic category group - none, audit, or allLogs.",
+          "displayName": "Category Group"
+        },
+        "allowedValues": [
+          "audit",
+          "allLogs"
+        ],
+        "defaultValue": "allLogs"
+      },
+      "diagnosticSettingName": {
+        "type": "String",
+        "metadata": {
+          "description": "Diagnostic Setting Name",
+          "displayName": "Diagnostic Setting Name"
+        },
+        "defaultValue": "setByPolicy-LogAnalytics"
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      },
+      "logAnalytics": {
+        "type": "String",
+        "metadata": {
+          "assignPermissions": true,
+          "description": "Log Analytics Workspace",
+          "displayName": "Log Analytics Workspace",
+          "strongType": "omsWorkspace"
+        }
+      },
+      "resourceLocationList": {
+        "type": "Array",
+        "metadata": {
+          "description": "Resource Location List to send logs to nearby Log Analytics. A single entry \"*\" selects all locations (default).",
+          "displayName": "Resource Location List"
+        },
+        "defaultValue": [
+          "*"
+        ]
+      },
+      "servicesToDeploy": {
+        "type": "Array",
+        "metadata": {
+          "description": "List of Storage services to deploy",
+          "displayName": "Storage services to deploy"
+        },
+        "allowedValues": [
+          "blobServices",
+          "fileServices",
+          "tableServices",
+          "queueServices"
+        ],
+        "defaultValue": [
+          "blobServices",
+          "fileServices",
+          "tableServices",
+          "queueServices"
+        ]
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "anyOf": [
+              {
+                "equals": "Microsoft.Storage/storageAccounts/fileServices",
+                "field": "type"
+              },
+              {
+                "equals": "Microsoft.Storage/storageAccounts/queueServices",
+                "field": "type"
+              },
+              {
+                "equals": "Microsoft.Storage/storageAccounts/tableServices",
+                "field": "type"
+              },
+              {
+                "equals": "Microsoft.Storage/storageAccounts/blobServices",
+                "field": "type"
+              }
+            ]
+          },
+          {
+            "anyOf": [
+              {
+                "equals": "*",
+                "value": "[first(parameters('resourceLocationList'))]"
+              },
+              {
+                "field": "location",
+                "in": "[parameters('resourceLocationList')]"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "details": {
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "parameters": {
+                "categoryGroup": {
+                  "value": "[parameters('categoryGroup')]"
+                },
+                "diagnosticSettingName": {
+                  "value": "[parameters('diagnosticSettingName')]"
+                },
+                "logAnalytics": {
+                  "value": "[parameters('logAnalytics')]"
+                },
+                "resourceName": {
+                  "value": "[field('fullName')]"
+                },
+                "servicesToDeploy": {
+                  "value": "[parameters('servicesToDeploy')]"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "outputs": {
+                  "policy": {
+                    "type": "string",
+                    "value": "[concat('Diagnostic setting ', parameters('diagnosticSettingName'), ' for type Storage Account Blob Service (Microsoft.Storage/storageAccounts/blobServices) ', parameters('resourceName'), ' to Log Analytics ', parameters('logAnalytics'), ' configured')]"
+                  }
+                },
+                "parameters": {
+                  "categoryGroup": {
+                    "type": "string"
+                  },
+                  "diagnosticSettingName": {
+                    "type": "string"
+                  },
+                  "logAnalytics": {
+                    "type": "string"
+                  },
+                  "resourceName": {
+                    "type": "string"
+                  },
+                  "servicesToDeploy": {
+                    "type": "array"
+                  }
+                },
+                "resources": [
+                  {
+                    "apiVersion": "2021-05-01-preview",
+                    "condition": "[contains(parameters('servicesToDeploy'), 'blobServices')]",
+                    "name": "[concat(parameters('resourceName'), '/', 'Microsoft.Insights/', parameters('diagnosticSettingName'))]",
+                    "properties": {
+                      "logs": [
+                        {
+                          "categoryGroup": "audit",
+                          "enabled": "[equals(parameters('categoryGroup'), 'audit')]"
+                        },
+                        {
+                          "categoryGroup": "allLogs",
+                          "enabled": "[equals(parameters('categoryGroup'), 'allLogs')]"
+                        }
+                      ],
+                      "metrics": [],
+                      "workspaceId": "[parameters('logAnalytics')]"
+                    },
+                    "type": "Microsoft.Storage/storageAccounts/blobServices/providers/diagnosticSettings"
+                  },
+                  {
+                    "apiVersion": "2021-05-01-preview",
+                    "condition": "[contains(parameters('servicesToDeploy'), 'fileServices')]",
+                    "name": "[concat(parameters('resourceName'), '/', 'Microsoft.Insights/', parameters('diagnosticSettingName'))]",
+                    "properties": {
+                      "logs": [
+                        {
+                          "categoryGroup": "audit",
+                          "enabled": "[equals(parameters('categoryGroup'), 'audit')]"
+                        },
+                        {
+                          "categoryGroup": "allLogs",
+                          "enabled": "[equals(parameters('categoryGroup'), 'allLogs')]"
+                        }
+                      ],
+                      "metrics": [],
+                      "workspaceId": "[parameters('logAnalytics')]"
+                    },
+                    "type": "Microsoft.Storage/storageAccounts/fileServices/providers/diagnosticSettings"
+                  },
+                  {
+                    "apiVersion": "2021-05-01-preview",
+                    "condition": "[contains(parameters('servicesToDeploy'), 'tableServices')]",
+                    "name": "[concat(parameters('resourceName'), '/', 'Microsoft.Insights/', parameters('diagnosticSettingName'))]",
+                    "properties": {
+                      "logs": [
+                        {
+                          "categoryGroup": "audit",
+                          "enabled": "[equals(parameters('categoryGroup'), 'audit')]"
+                        },
+                        {
+                          "categoryGroup": "allLogs",
+                          "enabled": "[equals(parameters('categoryGroup'), 'allLogs')]"
+                        }
+                      ],
+                      "metrics": [],
+                      "workspaceId": "[parameters('logAnalytics')]"
+                    },
+                    "type": "Microsoft.Storage/storageAccounts/tableServices/providers/diagnosticSettings"
+                  },
+                  {
+                    "apiVersion": "2021-05-01-preview",
+                    "condition": "[contains(parameters('servicesToDeploy'), 'queueServices')]",
+                    "name": "[concat(parameters('resourceName'), '/', 'Microsoft.Insights/', parameters('diagnosticSettingName'))]",
+                    "properties": {
+                      "logs": [
+                        {
+                          "categoryGroup": "audit",
+                          "enabled": "[equals(parameters('categoryGroup'), 'audit')]"
+                        },
+                        {
+                          "categoryGroup": "allLogs",
+                          "enabled": "[equals(parameters('categoryGroup'), 'allLogs')]"
+                        }
+                      ],
+                      "metrics": [],
+                      "workspaceId": "[parameters('logAnalytics')]"
+                    },
+                    "type": "Microsoft.Storage/storageAccounts/queueServices/providers/diagnosticSettings"
+                  }
+                ],
+                "variables": {}
+              }
+            }
+          },
+          "evaluationDelay": "AfterProvisioning",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "count": {
+                  "field": "Microsoft.Insights/diagnosticSettings/logs[*]",
+                  "where": {
+                    "allOf": [
+                      {
+                        "equals": "[equals(parameters('categoryGroup'), 'audit')]",
+                        "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled"
+                      },
+                      {
+                        "equals": "audit",
+                        "field": "microsoft.insights/diagnosticSettings/logs[*].categoryGroup"
+                      }
+                    ]
+                  }
+                },
+                "equals": 1
+              },
+              {
+                "count": {
+                  "field": "Microsoft.Insights/diagnosticSettings/logs[*]",
+                  "where": {
+                    "allOf": [
+                      {
+                        "equals": "[equals(parameters('categoryGroup'), 'allLogs')]",
+                        "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled"
+                      },
+                      {
+                        "equals": "allLogs",
+                        "field": "microsoft.insights/diagnosticSettings/logs[*].categoryGroup"
+                      }
+                    ]
+                  }
+                },
+                "equals": 1
+              },
+              {
+                "equals": "[parameters('logAnalytics')]",
+                "field": "Microsoft.Insights/diagnosticSettings/workspaceId"
+              }
+            ]
+          },
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/749f88d5-cbae-40b8-bcfc-e573ddc772fa",
+            "/providers/Microsoft.Authorization/roleDefinitions/92aaf0da-9dab-42b6-94a3-d43ce8d16293"
+          ],
+          "type": "Microsoft.Insights/diagnosticSettings"
+        },
+        "effect": "[parameters('effect')]"
+      }
+    }
+  }
+}
