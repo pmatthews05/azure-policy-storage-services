@@ -6,11 +6,7 @@
     "description": "Resource logs should be enabled to track activities and events that take place on your resources and give you visibility and insights into any changes that occur. This policy deploys a diagnostic setting using a category group to route logs to a Log Analytics workspace for Storage Account Services (blobServices/fileServices/queueServices/tableServices).",
     "metadata": {
       "category": "Monitoring",
-      "version": "1.0.0",
-      "createdBy": "757405d2-249c-4c4d-8d26-87f295e13c45",
-      "createdOn": "2025-11-07T09:06:55.4916709Z",
-      "updatedBy": null,
-      "updatedOn": null
+      "version": "1.0.0"
     },
     "version": "1.0.0",
     "parameters": {
