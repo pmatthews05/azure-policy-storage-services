@@ -27,7 +27,6 @@ If a storage account is created manually in the portal, then the policy will rem
    - [1-setup.ps1](/src/1-setup.ps1): Creates the Log Analytics workspace and User Assigned Managed Identity.
    - [2-create-storage.ps1](/src/2-create-storage.ps1): Creates the Storage Account with diagnostics enabled.
 
-
 ## Walkthrough for Bug
 1. Run the above scripts to create the resources.
 2. Waiting as long as you like, but the storage account that gets created will remain non-compliant.
@@ -48,16 +47,45 @@ If a storage account is created manually in the portal, then the policy will rem
 
 
 ## Resources Created
-| Resource Type           | Name                                     | Description                                                                  |
-| ----------------------- | ---------------------------------------- | ---------------------------------------------------------------------------- |
-| Azure Policy Definition | `$(yourprefix)StoragePolicy`             | Custom policy definition to enforce diagnostics on storage account services. |
-| Resource Group          | `$(yourprefix)-loganalytics-rg`          | Resource group for Log Analytics workspace, and User Managed Identity        |
-| Log Analytics Workspace | `$(yourprefix)LogAnalytics$(yoursuffix)` | Workspace to store diagnostics logs.                                         |
-| Resource Group          | `$(yourprefix)-storage-rg`                | Resource group for Storage Accounts.                                          |
-| User Managed Identity  | `$(yourprefix)StoragePolicyIdentity$(yoursuffix)` | Identity used by the policy to enable diagnostics on storage accounts.       |
-| Role Assignments        | N/A                                      | Assigns necessary permissions to the User Managed Identity. (Log Analytics Contributor and Monitoring Contributor) at Subscription scope. |
-| Azure Policy Assignment | `$(yourprefix)StoragePolicyAssignment`   | Policy assignment to enforce the storage policy on the specified scope.     |
+| Resource Type           | Name                                              | Description                                                                                                                               |
+| ----------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Azure Policy Definition | `$(yourprefix)StoragePolicy`                      | Custom policy definition to enforce diagnostics on storage account services.                                                              |
+| Resource Group          | `$(yourprefix)-loganalytics-rg`                   | Resource group for Log Analytics workspace, and User Managed Identity                                                                     |
+| Log Analytics Workspace | `$(yourprefix)LogAnalytics$(yoursuffix)`          | Workspace to store diagnostics logs.                                                                                                      |
+| Resource Group          | `$(yourprefix)-storage-rg`                        | Resource group for Storage Accounts.                                                                                                      |
+| User Managed Identity   | `$(yourprefix)StoragePolicyIdentity$(yoursuffix)` | Identity used by the policy to enable diagnostics on storage accounts.                                                                    |
+| Role Assignments        | N/A                                               | Assigns necessary permissions to the User Managed Identity. (Log Analytics Contributor and Monitoring Contributor) at Subscription scope. |
+| Azure Policy Assignment | `$(yourprefix)StoragePolicyAssignment`            | Policy assignment to enforce the storage policy on the specified scope.                                                                   |
 
 
 ## Cleanup
 To remove all resources created by the scripts, run the [3-destroy.ps1](/src/3-destroy.ps1) script.
+
+
+----
+> [!NOTE]
+> ### Deploying via the ARM Template
+> It turns out when deploying manually the ARM template that is created by Azure, has the blob and file services deployed as well. This is what remediates the policy.
+>
+> If you deploy the Storage account on it's own in an ARM template, it will not remediate the policy. If you then deploy an ARM template that just contains the blob and file services, it will remediate the policy.
+>
+> To prove this follow these steps below:
+ 
+
+### Deploy Storage account only via ARM Template.
+
+This assumes you have already created the Storage account resource group.
+
+1. In PowerShell run the `.\run.ps1` script in the [arm-template](/arm-template) folder.
+2. Wait for the deployment to complete.
+3. Check the Azure Policy compliance state for the storage account. It should be non-compliant.
+   1. Alternatively, you can check the diagnostic settings on the storage account, and you will see that none exist.
+
+### Deploy Blob and File services via ARM Template.
+1. In PowerShell run the `.\run.ps1` script in the [arm-template-services](/arm-template-services) folder.
+2. Wait for the deployment to complete.
+3. Check the Azure Policy compliance state for the storage account. It should now be compliant.
+   1. Alternatively, you can check the diagnostic settings on the storage account, and you will see that they have been enabled.
+
+> [!Important]
+> AZ CLI and PowerShell do not have resource commands of type services.

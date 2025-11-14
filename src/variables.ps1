@@ -10,6 +10,6 @@ $logAnalyticsRgName = "$YourPrefix-loganalytics-rg"
 $workspaceName = "$($YourPrefix)loganalytics$($YourSuffix)"
 
 $storageRgName = "$YourPrefix-storage-rg"
-$storageAccountName = "$($YourPrefix)storage$($YourSuffix)"
+$storageAccountName = "$($YourPrefix)storage$($YourSuffix)1"
 
 $userIdentityName = "$($YourPrefix)StoragePolicyIdentity$($YourSuffix)"
