@@ -88,4 +88,62 @@ This assumes you have already created the Storage account resource group.
    1. Alternatively, you can check the diagnostic settings on the storage account, and you will see that they have been enabled.
 
 > [!Important]
-> AZ CLI and PowerShell do not have resource commands of type services.
+> AZ CLI and PowerShell do not have resource commands of type services, and would required the deployment of an ARM Template. 
+> 
+> Terraform can be achieved using `azapi_update_resource`. You have to use the update provider as the services already exist as soon as the storage account is created, but this does trigger the policy to auto-remediate.
+>
+ ```hcl
+terraform {
+  required_providers {
+    azapi = {
+      source = "Azure/azapi"
+    }
+  }
+}
+
+# snippet example of storage account.
+resource "azurerm_storage_account" "storage_account" {
+  name                     = var.storage_account_name
+  resource_group_name      = var.resource_group_name
+  location                 = "uksouth"
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
+}
+
+resource "time_sleep" "wait" {
+  depends_on      = [azurerm_storage_account.storage_account]
+  create_duration = "15s"
+}
+
+resource "azapi_update_resource" "blob_service" {
+  depends_on = [time_sleep.wait]
+
+  type      = "Microsoft.Storage/storageAccounts/blobServices@2025-01-01"
+  name      = "default"
+  parent_id = azurerm_storage_account.storage_account.id
+}
+
+resource "azapi_update_resource" "file_service" {
+  depends_on = [time_sleep.wait]
+
+  type      = "Microsoft.Storage/storageAccounts/fileServices@2025-01-01"
+  name      = "default"
+  parent_id = azurerm_storage_account.storage_account.id
+}
+
+resource "azapi_update_resource" "table_service" {
+  depends_on = [time_sleep.wait]
+
+  type      = "Microsoft.Storage/storageAccounts/tableServices@2025-01-01"
+  name      = "default"
+  parent_id = azurerm_storage_account.storage_account.id
+}
+
+resource "azapi_update_resource" "queue_service" {
+  depends_on = [time_sleep.wait]
+
+  type      = "Microsoft.Storage/storageAccounts/queueServices@2025-01-01"
+  name      = "default"
+  parent_id = azurerm_storage_account.storage_account.id
+}
+```
